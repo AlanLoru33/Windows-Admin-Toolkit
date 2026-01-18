@@ -1,0 +1,157 @@
+# --- MASTER SUITE DE SOPORTE TECNICO v11.0 ---
+$ErrorActionPreference = "SilentlyContinue"
+
+# [1] DETECCION DE ENTORNO Y PRIVILEGIOS
+$MODO_SEGURO = if (Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\SafeBoot\Option" -ErrorAction SilentlyContinue) { $true } else { $false }
+
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator") -and -not $MODO_SEGURO) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+# [2] LOGICA DE ACCESO (SMITH LOZANO STYLE)
+function Verificar-Acceso {
+    if ($MODO_SEGURO) { return $true }
+    Clear-Host
+    Write-Host "===========================================================" -ForegroundColor Red
+    Write-Host "        ACCESO RESTRINGIDO - PERSONAL AUTORIZADO" -ForegroundColor Red
+    Write-Host "===========================================================" -ForegroundColor Red
+    $pass = Read-Host ">>> Ingrese Contraseña de Tecnico" -AsSecureString
+    $passTexto = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+    return ($passTexto -eq "soporte")
+}
+
+if (-not (Verificar-Acceso)) { Write-Host "Credenciales Incorrectas."; Start-Sleep 2; exit }
+
+# [3] SUBMENÚS DETALLADOS
+function Menu-Limpieza {
+    do {
+        Clear-Host
+        Write-Host ">>> MODULO 1: SANEAMIENTO PROFUNDO" -ForegroundColor Cyan
+        Write-Host " [1] Temporales (User/System) y Prefetch"
+        Write-Host " [2] Vaciar Papelera y Cache de Navegadores"
+        Write-Host " [3] Limpiar WinSxS (Borrar backups de Windows Update)"
+        Write-Host " [4] Resetear Componentes de Windows Update (Fix-IT)"
+        Write-Host " [5] Eliminar Logs de Eventos (Event Viewer)"
+        Write-Host " [0] VOLVER"
+        $sel = Read-Host "Seleccione"
+        switch ($sel) {
+            "1" { Remove-Item "$env:TEMP\*" -Recurse -Force; Remove-Item "C:\Windows\Temp\*" -Recurse -Force; Remove-Item "C:\Windows\Prefetch\*" -Recurse -Force }
+            "2" { Clear-RecycleBin -Confirm:$false; RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255 }
+            "3" { Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase; Pause }
+            "4" { net stop wuauserv; net stop bits; Remove-Item "C:\Windows\SoftwareDistribution\*" -Recurse -Force; net start wuauserv; net start bits }
+            "5" { wevtutil el | Foreach-Object {wevtutil cl "$_"} }
+        }
+    } while ($sel -ne "0")
+}
+
+function Menu-Red {
+    do {
+        Clear-Host
+        Write-Host ">>> MODULO 2: CONECTIVIDAD Y RED" -ForegroundColor Green
+        Write-Host " [1] Resetear IP (Release/Renew) + DNS"
+        Write-Host " [2] Reestablecer Protocolos (Winsock/TCP-IP)"
+        Write-Host " [3] Desactivar IPv6 (Para redes antiguas)"
+        Write-Host " [4] Activar/Desactivar Firewall de Windows"
+        Write-Host " [5] Ver Adaptadores y Ping de Latencia"
+        Write-Host " [0] VOLVER"
+        $sel = Read-Host "Seleccione"
+        switch ($sel) {
+            "1" { ipconfig /release; ipconfig /renew; ipconfig /flushdns }
+            "2" { netsh winsock reset; netsh int ip reset }
+            "3" { Disable-NetAdapterBinding -Name "*" -ComponentID ms_tcpip6 }
+            "4" { 
+                $st = Read-Host "1. ON / 2. OFF"; 
+                if ($st -eq "1") { Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True } else { Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False }
+            }
+            "5" { Get-NetAdapter; ping 8.8.8.8 -n 4; Pause }
+        }
+    } while ($sel -ne "0")
+}
+
+function Menu-Rendimiento {
+    do {
+        Clear-Host
+        Write-Host ">>> MODULO 3: OPTIMIZACION (DOOFY STYLE)" -ForegroundColor Magenta
+        Write-Host " [1] Liberar RAM Instantaneamente (Real-Time)"
+        Write-Host " [2] Optimizar Latencia TCP (TCP Optimizer Script)"
+        Write-Host " [3] Deshabilitar Telemetria y Servicios de Rastreo"
+        Write-Host " [4] Activar Plan de Energia 'Maximo Rendimiento'"
+        Write-Host " [5] Deshabilitar Apps de Inicio (Startup)"
+        Write-Host " [0] VOLVER"
+        $sel = Read-Host "Seleccione"
+        switch ($sel) {
+            "1" { [System.GC]::Collect(); Write-Host "RAM Liberada." }
+            "2" { netsh int tcp set global autotuninglevel=normal; netsh int tcp set global congestionprovider=ctcp }
+            "3" { Set-Service DiagTrack -StartupType Disabled; Set-Service dmwappushservice -StartupType Disabled }
+            "4" { powercfg -duplicatescheme 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c; powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c }
+            "5" { Get-CimInstance Win32_StartupCommand | Select-Object Name, Command | Out-GridView; Pause }
+        }
+    } while ($sel -ne "0")
+}
+
+function Menu-Reparacion {
+    do {
+        Clear-Host
+        Write-Host ">>> MODULO 4: REPARACION DE SISTEMA" -ForegroundColor Yellow
+        Write-Host " [1] Ejecutar SFC (System File Checker)"
+        Write-Host " [2] Ejecutar DISM (Repair Health)"
+        Write-Host " [3] Programar CHKDSK C: /F /R (Reinicio)"
+        Write-Host " [4] Reinstalar Microsoft Store y Apps"
+        Write-Host " [5] Reparar Iconos de Escritorio (IconCache)"
+        Write-Host " [0] VOLVER"
+        $sel = Read-Host "Seleccione"
+        switch ($sel) {
+            "1" { sfc /scannow; Pause }
+            "2" { DISM /Online /Cleanup-Image /RestoreHealth; Pause }
+            "3" { echo y | chkdsk c: /f /r; Write-Host "CHKDSK programado."; Pause }
+            "4" { Get-AppxPackage -AllUsers | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"} }
+            "5" { iex (iwr "https://git.io/JvY5p") } # Script externo rapido para IconCache
+        }
+    } while ($sel -ne "0")
+}
+
+# [4] MENU PRINCIPAL DE NIVEL ELITE
+do {
+    Clear-Host
+    Write-Host " ===========================================================" -ForegroundColor Cyan
+    Write-Host "       MASTER SUITE ELITE - CENTRO DE CONTROL HIBRIDO" -ForegroundColor Cyan
+    Write-Host " ===========================================================" -ForegroundColor Cyan
+    if ($MODO_SEGURO) { Write-Host " [!] ADVERTENCIA: MODO SEGURO ACTIVO" -ForegroundColor Red }
+    
+    Write-Host " [1] 🧹 MANTENIMIENTO: Limpieza y WinSxS Pro"
+    Write-Host " [2] 🌐 RED:           Herramientas de Conectividad"
+    Write-Host " [3] 🚀 RENDIMIENTO:   Optimizaciones de Tiempo Real"
+    Write-Host " [4] 🔧 REPARACION:    DISM, SFC y Errores de Disco"
+    Write-Host " [5] 🛠️  HERRAMIENTAS:  Lanzar Chris Titus WinUtil"
+    Write-Host " [6] 💾 HARDWARE:      Diagnostico de Salud y Drivers"
+    Write-Host " [7] 🛡️ SEGURO:        Gestionar Modo Seguro (Boot)"
+    Write-Host " [8] 📝 INFORMACION:   Hardware Info & Procesos RAM"
+    Write-Host " [0] SALIR"
+    Write-Host " ===========================================================" -ForegroundColor Cyan
+    
+    $mainOp = Read-Host ">>> Seleccione Modulo"
+    switch ($mainOp) {
+        "1" { Menu-Limpieza }
+        "2" { Menu-Red }
+        "3" { Menu-Rendimiento }
+        "4" { Menu-Reparacion }
+        "5" { iwr -useb https://christitus.com/win | iex }
+        "6" { 
+            Write-Host "Salud de Discos:" -ForegroundColor Yellow
+            Get-PhysicalDisk | Select FriendlyName, HealthStatus, Size
+            $dr = Read-Host "Respaldar Drivers en Escritorio? (s/n)"
+            if ($dr -eq "s") { Export-WindowsDriver -Online -Destination "$env:USERPROFILE\Desktop\Drivers_Backup" }
+            Pause 
+        }
+        "7" {
+            Write-Host "1. Modo Seguro (Red) | 2. Modo Normal"; $s = Read-Host ">>"
+            if ($s -eq "1") { bcdedit /set {current} safeboot network; Restart-Computer } else { bcdedit /deletevalue {current} safeboot; Restart-Computer }
+        }
+        "8" { 
+            Get-ComputerInfo | Select CsName, OsName, OsArchitecture | Format-List
+            Get-Process | Sort-Object WorkingSet -Descending | Select -First 10 | Format-Table
+            Pause 
+        }
+    }
+} while ($mainOp -ne "0")
