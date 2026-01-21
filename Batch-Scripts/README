@@ -1,0 +1,45 @@
+# 🛠️ Service Desk Elite Toolbox
+
+Una colección avanzada de scripts de automatización, auditoría y mantenimiento para técnicos de soporte y administradores de sistemas. Esta suite combina herramientas clásicas de diagnóstico con optimizaciones de rendimiento en tiempo real y seguridad industrial.
+
+## 🚀 Scripts Principales
+
+### 1. [SysAudit-Net-Console.bat](./COMANDO.BAT)
+La "Navaja Suiza" para infraestructura y ciberseguridad. 
+- **Auditoría de Red:** Escaneo de puertos, reset de stack TCP/IP, tablas ARP y pruebas de conectividad específicas.
+- **Hardware & Sistema:** Reportes de batería, seriales de BIOS, estado de drivers y visor de errores graves en tiempo real.
+- **Seguridad:** Gestión de procesos, usuarios administradores y aplicaciones de inicio.
+
+### 2. [USB-Shield-Vaccine.bat](./vacuna.bat)
+Herramienta de respuesta ante incidentes para unidades extraíbles.
+- **Recuperación:** Restaura archivos ocultos por malware (Atributos de sistema).
+- **Inmunización:** Crea una estructura de carpetas segura con permisos NTFS restringidos para evitar nuevas infecciones por autorun.
+
+### 3. [Quick-PC-Survey.bat](./AUDITORIA.BAT)
+Script de relevamiento rápido para auditorías de campo.
+- Obtención inmediata de Hostname, IP local y estado del Antivirus.
+- Diagnóstico veloz de salida a internet.
+
+---
+
+## 💎 Master Suite (PowerShell)
+*Próximamente / Incluido en el repositorio*
+He desarrollado una **Suite Integral** que unifica la lógica de estos scripts con funciones modernas:
+- **Optimización Doofy:** Liberación de RAM y baja latencia de red.
+- **Integración Chris Titus:** Acceso directo a instaladores de software esenciales.
+- **Mantenimiento Profundo:** Purga de WinSxS y limpieza de residuos de desinstalación.
+
+---
+
+## 🔐 Seguridad y Acceso
+Para entornos corporativos, la suite principal cuenta con un sistema de protección:
+- **Modo Normal:** Requiere elevación de privilegios y contraseña de técnico (`soporte`).
+- **Modo Seguro:** Detección automática para reparaciones críticas sin bloqueos de contraseña.
+
+## 🛠️ Instrucciones de Uso
+1. Descarga el repositorio o el script necesario.
+2. Ejecuta siempre como **Administrador** para garantizar el acceso a registros de sistema y red.
+3. En caso de infección por virus de acceso directo, usa el `USB-Shield` seleccionando la letra de la unidad.
+
+---
+**Desarrollado por [Tu Nombre o Smith Lozano]** *Service Desk & Infrastructure Optimization Specialist*
